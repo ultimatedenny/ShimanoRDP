@@ -1,0 +1,39 @@
+﻿using System;
+using System.Windows.Forms;
+using ShimanoRDP.UI;
+using ShimanoRDP.UI.Controls;
+using ShimanoRDP.UI.Window;
+
+namespace ShimanoRDP.Messages.MessageWriters
+{
+    public class NotificationPanelMessageWriter : IMessageWriter
+    {
+        private readonly ErrorAndInfoWindow _messageWindow;
+
+        public NotificationPanelMessageWriter(ErrorAndInfoWindow messageWindow)
+        {
+            if (messageWindow == null)
+                throw new ArgumentNullException(nameof(messageWindow));
+
+            _messageWindow = messageWindow;
+        }
+
+        public void Write(IMessage message)
+        {
+            var lvItem = new NotificationMessageListViewItem(message);
+            AddToList(lvItem);
+        }
+
+        private void AddToList(ListViewItem lvItem)
+        {
+            if (_messageWindow.lvErrorCollector.InvokeRequired)
+                _messageWindow.lvErrorCollector.Invoke((MethodInvoker)(() => AddToList(lvItem)));
+            else
+            {
+                _messageWindow.lvErrorCollector.Items.Insert(0, lvItem);
+                if (_messageWindow.lvErrorCollector.Items.Count > 0)
+                    _messageWindow.pbError.Visible = true;
+            }
+        }
+    }
+}
